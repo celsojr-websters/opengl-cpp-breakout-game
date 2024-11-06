@@ -115,8 +115,13 @@ void Game::Update(float dt)
     Ball->Move(dt, this->Width);
     // check for collisions
     this->DoCollisions();
-    // update particles
-    Particles->Update(dt, *Ball, 1, glm::vec2(Ball->Radius / 2.0f));
+
+    if (!Ball->Stuck)
+    {
+        // update particles
+        Particles->Update(dt, *Ball, 1, glm::vec2(Ball->Radius / 2.0f));
+    }
+
     // update PowerUps
     this->UpdatePowerUps(dt);
     // reduce shake time
@@ -136,8 +141,8 @@ void Game::Update(float dt)
             this->ResetLevel();
             this->State = GAME_MENU;
         }
-        // this->ResetLevel();
         this->ResetPlayer();
+        Particles->Clear();
     }
     // check win condition
     if (this->State == GAME_ACTIVE && this->Levels[this->Level].IsCompleted())
@@ -351,6 +356,8 @@ void Game::DoCollisions()
 
         // if Sticky powerup is activated, also stick ball to paddle once new velocity vectors were calculated
         Ball->Stuck = Ball->Sticky;
+
+        if (Ball->Sticky) Particles->Clear();
 
         SoundEngine->play2D(RESOURCES_PATH "audio/bleep.wav", false);
     }

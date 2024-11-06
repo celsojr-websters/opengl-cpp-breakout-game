@@ -136,3 +136,9 @@ void ParticleGenerator::respawnParticle(Particle& particle, GameObject& object, 
         particle.Velocity = object.Velocity * 0.1f;
     }
 }
+
+void ParticleGenerator::Clear() {
+    for (auto& particle : particles) {
+        particle.Lifespan = 0.0f;
+    }
+}

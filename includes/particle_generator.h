@@ -45,6 +45,7 @@ public:
     void Update(float dt, GameObject& object, unsigned int newParticles, glm::vec2 offset = glm::vec2(0.0f, 0.0f), ParticleType type = STANDARD);
     // render all particles
     void Draw();
+    void Clear();
 private:
     // state
     std::vector<Particle> particles;
