@@ -4,7 +4,16 @@ project(OpenGLProject)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE) # Link time optimization
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
 include(FetchContent)
+
 FetchContent_Declare(
     glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -26,22 +35,24 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(freetype)
 
-# set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/includes)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/includes/irrklang)
 
 file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB GLAD_FILES ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/src/glad.c)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${GLAD_FILES})
 
-target_compile_definitions("${PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+if (MSVC)
+    # Ensure SIMD optimizations take place
+    target_compile_options(${PROJECT_NAME} PRIVATE /arch:AVX2)
+    
+    # Set subsystem to WINDOWS for a no-console application
+    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+endif()
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
 
 set(IRRKLANG_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/irrKlang.lib")
-# set(FREETYPED_LIB_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/freetyped.lib")
-
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     glfw
@@ -49,7 +60,6 @@ target_link_libraries(${PROJECT_NAME}
     glm::glm
     freetype
     ${IRRKLANG_LIB_PATH}
-    # ${FREETYPED_LIB_SOURCE_PATH}
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -60,15 +70,9 @@ target_include_directories(${PROJECT_NAME}
     ${glm_SOURCE_DIR}
 )
 
-# set(FREETYPED_LIB_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/freetyped.lib")
-# set(FREETYPED_LIB_DEST_PATH "${CMAKE_CURRENT_BINARY_DIR}/_deps/freetype-build/Debug/freetyped.lib")
-# file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/freetype-build/Debug")
-
 set(DLL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dlls")
-
 file(GLOB DLL_FILES "${DLL_DIR}/*.dll")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${DLL_DIR}" $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    # COMMAND ${CMAKE_COMMAND} -E copy_directory "${FREETYPED_LIB_SOURCE_PATH}" "${FREETYPED_LIB_DEST_PATH}">
 )

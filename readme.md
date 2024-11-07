@@ -6,10 +6,10 @@
 
 ## Installation Requirements
 - **Windows**: Install [Scoop](https://scoop.sh/) for managing dependencies
-- **Linux**: Not supported
-- **macOS**: Not supported
+- **Linux**: Not supported at the moment
+- **macOS**: Not supported at the moment
 
-## Installation Requirements
+## Installing dependencies
 ```powershell
 scoop install gcc cmake make
 ```
@@ -23,17 +23,17 @@ scoop install gcc cmake make
 
 2. Generate the build files:
    ```bash
-   cmake -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF ..
+   cmake ..
    ```
 
 3. Build the project:
    ```bash
-   cmake --build . --config Debug
+   cmake --build . --config Release
    ```
 
 4. Run the executable:
    ```powershell
-   start .\Debug\OpenGLProject.exe
+   start .\Release\OpenGLProject.exe
    ```
 
 5. (Optional) Open the Visual Studio solution if desired:
